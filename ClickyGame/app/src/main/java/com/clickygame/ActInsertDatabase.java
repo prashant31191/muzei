@@ -90,7 +90,7 @@ public class ActInsertDatabase extends AppCompatActivity {
                     // inset
 
                     App.sLog("===========display records====");
-                    getAllRecords();
+                    //getAllRecords();
 
                     Intent intent = new Intent(ActInsertDatabase.this,ActNotification.class);
                     startActivity(intent);

@@ -82,19 +82,7 @@ public class ActNotification extends Activity {
             RealmConfiguration realmConfiguration = new RealmConfiguration.Builder().build();
             realm = Realm.getInstance(realmConfiguration);
 
-
-
-            /*if (App.isInternetAvail(ActNotification.this))
-            {
-
-                page = 0;
-                arrayListAllDLocationModel = new ArrayList<>();
-
-               } else {
-                App.showSnackBar(tvNodataTag, "We can't detect an internet connection. please check and try again.");
-            }*/
-
-            page = 0;
+             page = 0;
             arrayListAllDLocationModel = new ArrayList<>();
             getAllRecords();
 
@@ -247,19 +235,9 @@ public class ActNotification extends Activity {
             @Override
             public void onRefresh(final MaterialRefreshLayout materialRefreshLayout) {
                 //refreshing...
-                if (App.isInternetAvail(ActNotification.this)) {
-                    //asyncGetDataList();
-
-                    page = 0;
-                    arrayListAllDLocationModel = new ArrayList<>();
-
-
-
-                } else {
-
-                    App.showSnackBar(tvNodataTag, ("We can't detect an internet connection. please check and try again."));
-
-                }
+                page = 0;
+                arrayListAllDLocationModel = new ArrayList<>();
+                getAllRecords();
             }
 
             @Override
@@ -267,27 +245,7 @@ public class ActNotification extends Activity {
                 try {
 
 
-                    if (App.isInternetAvail(ActNotification.this)) {
-
-                        if (arrayListAllDLocationModel != null && strTotalResult.equalsIgnoreCase("" + arrayListAllDLocationModel.size())) {
-                            if (arrayListAllDLocationModel.size() >= 20) {
-                                App.showSnackBar(tvNodataTag, "No more notification found.");
-                            }
-                            materialRefreshLayout.finishRefresh();
-                            // load more refresh complete
-                            materialRefreshLayout.finishRefreshLoadMore();
-                        } else {
-                            page = page + 1;
-
-                        }
-                    } else {
-                        App.showSnackBar(tvNodataTag, ("We can't detect an internet connection. please check and try again."));
-
-
-                        materialRefreshLayout.finishRefresh();
-                        // load more refresh complete
-                        materialRefreshLayout.finishRefreshLoadMore();
-                    }
+                    //sdasd
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -355,7 +313,7 @@ public class ActNotification extends Activity {
                 versionViewHolder.tvName.setTypeface(App.getFont_Regular());
                 versionViewHolder.tvData.setTypeface(App.getFont_Regular());
 
-                versionViewHolder.cardItemLayout.setCardBackgroundColor(App.getMatColor("500"));
+                versionViewHolder.cardItemLayout.setCardBackgroundColor(App.getMatColor("A100"));
 
                 if (notificationListModel.getCountry() != null && notificationListModel.getRegion() != null && notificationListModel.getRegion().length() > 0) {
                     versionViewHolder.tvName.setText(Html.fromHtml("<b>" + notificationListModel.getCountry() + " # </b>" + notificationListModel.getRegion() ));
@@ -453,9 +411,16 @@ public class ActNotification extends Activity {
         }
 
 
-        public void removeItem(int position) {
+        public void removeItem(final int position) {
 
 
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    RealmResults<DLocationModel> result = realm.where(DLocationModel.class).equalTo(DLocationModel.Image_URL,mArrListDLocationModel.get(position).getImage_URL()).findAll();
+                    result.deleteAllFromRealm();
+                }
+            });
 
                 mArrListDLocationModel.remove(position);
                 notifyItemRemoved(position);

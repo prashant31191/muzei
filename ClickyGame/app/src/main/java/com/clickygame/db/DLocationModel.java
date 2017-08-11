@@ -9,7 +9,7 @@ import io.realm.RealmObject;
 public class DLocationModel extends RealmObject {
     public String Country;
     public String Region;
-    public String Image_URL;
+    public static String Image_URL;
     public String Google_Maps_URL;
     public int ID;
 
