@@ -1,5 +1,7 @@
 package com.clickygame.db;
 
+import com.google.gson.annotations.SerializedName;
+
 import io.realm.RealmObject;
 
 /**
@@ -7,10 +9,20 @@ import io.realm.RealmObject;
  */
 
 public class DLocationModel extends RealmObject {
+
+    @SerializedName("Country")
     public String Country;
+
+    @SerializedName("Region")
     public String Region;
-    public static String Image_URL;
+
+    @SerializedName("Image_URL")
+    public String Image_URL;
+
+    @SerializedName("Google_Maps_URL")
     public String Google_Maps_URL;
+
+    @SerializedName("ID")
     public int ID;
 
     public void setCountry(String country) {

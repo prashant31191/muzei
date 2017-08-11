@@ -417,7 +417,7 @@ public class ActNotification extends Activity {
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
-                    RealmResults<DLocationModel> result = realm.where(DLocationModel.class).equalTo(DLocationModel.Image_URL,mArrListDLocationModel.get(position).getImage_URL()).findAll();
+                    RealmResults<DLocationModel> result = realm.where(DLocationModel.class).equalTo("Image_URL",mArrListDLocationModel.get(position).getImage_URL()).findAll();
                     result.deleteAllFromRealm();
                 }
             });
