@@ -15,11 +15,17 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.Editable;
 import android.text.Html;
+import android.text.TextWatcher;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -40,6 +46,7 @@ import com.clickygame.db.DLocationModel;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmQuery;
@@ -55,6 +62,7 @@ public class ActNotification extends Activity {
     NotificationAdapter notificationAdapter;
     TextView tvNodataTag;
     LinearLayout llNodataTag;
+    EditText etSearch;
 
 
     String strFrom = "", strTitle = "Notifications";
@@ -135,13 +143,62 @@ public class ActNotification extends Activity {
         }
     }
 
+    private void getAllSearchRecords(String strTextCountry){
+        try{
+
+            //RealmResults<DLocationModel> arrDLocationModel = realm.where(DLocationModel.class).findAll();
+            //RealmResults<DLocationModel> result = realm.where(DLocationModel.class).equalTo("Image_URL",mArrListDLocationModel.get(position).getImage_URL()).findAll();
+
+
+
+            RealmResults<DLocationModel> arrDLocationModel = realm.where(DLocationModel.class)
+                    .contains("Country", strTextCountry, Case.INSENSITIVE)
+                    //.contains("Country", strTextCountry,false)
+                    //.containsIgnoreCase("Country", strTextCountry)
+                    .findAll();
+
+            App.sLog("===arrDLocationModel=="+arrDLocationModel);
+
+            List<DLocationModel> arraDLocationModel = arrDLocationModel;
+
+            for(int k=0;k<arraDLocationModel.size();k++)
+            {
+                App.sLog(k+"===arraDLocationModel=="+arraDLocationModel.get(k).getImage_URL());
+            }
+
+            arrayListAllDLocationModel = new ArrayList<DLocationModel>(arraDLocationModel);
+
+
+
+            // RealmQuery<DLocationModel> query = realm.where(DLocationModel.class);
+            /*
+            for (String id : ids) {
+                query.or().equalTo("myField", id);
+            }*/
+
+/*
+            RealmResults<DLocationModel> results = query.findAll();
+            App.sLog("===results=="+results);
+            */
+
+
+            setViewData();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     private void initialization() {
         try {
-
+            etSearch = (EditText) findViewById(R.id.etSearch);
             recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
             tvNodataTag = (TextView) findViewById(R.id.tvNodataTag);
             llNodataTag = (LinearLayout) findViewById(R.id.llNodataTag);
             materialRefreshLayout = (MaterialRefreshLayout) findViewById(R.id.refresh);
+
+
             materialRefreshLayout.setIsOverLay(true);
             materialRefreshLayout.setWaveShow(true);
             materialRefreshLayout.setWaveColor(0x55ffffff);
@@ -249,6 +306,23 @@ public class ActNotification extends Activity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
+        });
+
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                getAllSearchRecords(s.toString());
             }
         });
     }
@@ -400,9 +474,35 @@ public class ActNotification extends Activity {
                         }
                     }
                 });
+                // Set the view to fade in
+               // setFadeAnimation(versionViewHolder.itemView);
+                setAnimation(versionViewHolder.itemView,i);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        /**
+         * Here is the key method to apply the animation
+         */
+        // Allows to remember the last item shown on screen
+        private int lastPosition = -1;
+
+        private void setAnimation(View viewToAnimate, int position)
+        {
+            // If the bound view wasn't previously displayed on screen, it's animated
+            if (position > lastPosition)
+            {
+                Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.slide_in_up);
+                viewToAnimate.startAnimation(animation);
+                lastPosition = position;
+            }
+        }
+        int FADE_DURATION = 300;
+        private void setFadeAnimation(View view) {
+            AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
+            anim.setDuration(FADE_DURATION);
+            view.startAnimation(anim);
         }
 
         @Override

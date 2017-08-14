@@ -56,8 +56,18 @@ android:background="@drawable/bg_gradiant"
             android:textSize="@dimen/lable_normal_text_size"/>
     </LinearLayout>
 
+    <EditText
+        android:id="@+id/etSearch"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_50sdp"
+        android:background="@color/white"
+        android:textColor="@color/colorPrimaryDark"
+        android:hint="Type country name"
+        />
+
     <com.cjj.MaterialRefreshLayout
         android:id="@+id/refresh"
+        android:layout_marginTop="@dimen/_52sdp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
