@@ -25,6 +25,10 @@ import android.widget.Button;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.flaviofaria.kenburnsview.KenBurnsView;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.Random;
 
@@ -46,6 +50,15 @@ public class ActSplash extends Activity {
 
     //private Elasticode elasticode;
     //int i=0;
+
+
+    App app;
+
+
+    private FirebaseAnalytics mFirebaseAnalytics;
+    private FirebaseAuth mFirebaseAuth;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -54,6 +67,9 @@ public class ActSplash extends Activity {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.act_splash_screen);
+
+        app = (App) getApplicationContext();
+
         mKenBurns = (KenBurnsView) findViewById(R.id.ken_burns_images);
 
 
@@ -95,6 +111,21 @@ public class ActSplash extends Activity {
 
 
 
+        // Initialize FirebaseAuth
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
+
+        String refreshedToken = App.sharePrefrences.getStringPref("strDeviceId");
+        App.showLog("====refreshedToken===device token===" + refreshedToken);
+        if (refreshedToken != null && refreshedToken.length() > 5) {
+            App.sharePrefrences.setPref("strDeviceId", refreshedToken);
+            TIME = 2000;
+        } else {
+            getDeviceToken();
+        }
+
         displaySplash();
 
         try {
@@ -105,6 +136,28 @@ public class ActSplash extends Activity {
         }
 
 
+    }
+
+    // Get Device token - Function
+    private void getDeviceToken() {
+        try {
+
+            String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+            Log.d(TAG, "Refreshed token: " + refreshedToken);
+            // [START subscribe_topics]
+            //FirebaseMessaging.getInstance().subscribeToTopic("news");
+            Log.d(TAG, "Subscribed to news topic");
+            // [END subscribe_topics]
+            Log.d(TAG, "InstanceID token: " + FirebaseInstanceId.getInstance().getToken());
+
+            if (refreshedToken != null && refreshedToken.length() > 5) {
+                App.sharePrefrences.setPref("strDeviceId", refreshedToken);
+
+                TIME = 2000;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // splash screen set with timing

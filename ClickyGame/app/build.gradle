@@ -77,4 +77,18 @@ dependencies {
 
     // for the menu
     compile 'com.nightonke:boommenu:2.1.0'
+
+
+
+    // Fire base
+    compile 'com.google.firebase:firebase-core:11.0.1'
+    //fiber analytics
+    compile 'com.google.firebase:firebase-auth:11.0.1'
+    compile 'com.google.firebase:firebase-config:11.0.1'
+    compile 'com.google.firebase:firebase-analytics:11.0.1'
+    compile 'com.google.firebase:firebase-crash:11.0.1'
+
+    // for the token and notification
+    compile 'com.google.firebase:firebase-messaging:11.0.1'
 }
+apply plugin: 'com.google.gms.google-services'

@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.clickygame.utils.SharePrefrences;
+import com.google.firebase.FirebaseApp;
 import com.google.gson.Gson;
 
 import java.io.BufferedWriter;
@@ -303,6 +304,8 @@ public class App extends Application {
 
     public static void showLog(String strMessage) {
         Log.v("==App==", "--strMessage--" + strMessage);
+    }public static void showLog(String strMessage1,String strMessage) {
+        Log.v("==App tag=="+strMessage1, "--strMessage--" + strMessage);
     }
 
 
