@@ -3,6 +3,7 @@ package com.clickygame;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -43,6 +44,13 @@ import com.bumptech.glide.request.target.Target;
 import com.cjj.MaterialRefreshLayout;
 import com.cjj.MaterialRefreshListener;
 import com.clickygame.db.DLocationModel;
+import com.clickygame.utils.BuilderManager;
+import com.nightonke.boommenu.BoomButtons.BoomButton;
+import com.nightonke.boommenu.BoomButtons.HamButton;
+import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
+import com.nightonke.boommenu.BoomMenuButton;
+import com.nightonke.boommenu.OnBoomListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -384,21 +392,45 @@ public class ActNotification extends Activity {
             try {
                 DLocationModel notificationListModel = mArrListDLocationModel.get(i);
 
-                versionViewHolder.tvName.setTypeface(App.getFont_Regular());
-                versionViewHolder.tvData.setTypeface(App.getFont_Regular());
+                /*versionViewHolder.bmb1.clearBuilders();
+                for (int i0 = 0; i0 < versionViewHolder.bmb1.getPiecePlaceEnum().pieceNumber(); i0++)
+                    versionViewHolder.bmb1.addBuilder(BuilderManager.getSimpleCircleButtonBuilder());
+*/
+                versionViewHolder.bmb2.clearBuilders();
+
+                for (int j = 0; j < versionViewHolder.bmb2.getPiecePlaceEnum().pieceNumber(); j++)
+                {
+                    versionViewHolder.bmb2.addBuilder((HamButton.Builder) getBuilderHamMenu().get(j));
+                }
+
+
+
+
+                if (notificationListModel.getIsFavorite() != null && notificationListModel.getIsFavorite().equalsIgnoreCase("1"))
+                {
+                    versionViewHolder.ivFav.setVisibility(View.VISIBLE);
+                    versionViewHolder.ivFav.setSelected(true);
+                    versionViewHolder.ivFav.setAlpha(1f);
+                }
+                else
+                {
+                    versionViewHolder.ivFav.setVisibility(View.VISIBLE);
+                    versionViewHolder.ivFav.setSelected(false);
+                    versionViewHolder.ivFav.setAlpha(0.5f);
+                }
 
                 versionViewHolder.cardItemLayout.setCardBackgroundColor(App.getMatColor("A100"));
 
                 if (notificationListModel.getCountry() != null && notificationListModel.getRegion() != null && notificationListModel.getRegion().length() > 0) {
                     versionViewHolder.tvName.setText(Html.fromHtml("<b>" + notificationListModel.getCountry() + " # </b>" + notificationListModel.getRegion() ));
-                    versionViewHolder.tvName.setTextColor(Color.parseColor("#111111"));
-                    int color = versionViewHolder.cardItemLayout.getContext().getResources().getColor(R.color.clrCardbgUnRead);
+                    versionViewHolder.tvName.setTextColor(Color.parseColor("#000000"));
+                    //int color = versionViewHolder.cardItemLayout.getContext().getResources().getColor(R.color.clrCardbgUnRead);
                     //versionViewHolder.cardItemLayout.setCardBackgroundColor(color);
                 } else {
                     versionViewHolder.tvName.setText(Html.fromHtml("<b>" + notificationListModel.getCountry() + "</b>"));
                     versionViewHolder.tvName.setTextColor(Color.parseColor("#111111"));
 
-                    int color = versionViewHolder.cardItemLayout.getContext().getResources().getColor(R.color.clrCardbgRead);
+                   // int color = versionViewHolder.cardItemLayout.getContext().getResources().getColor(R.color.clrCardbgRead);
                     //versionViewHolder.cardItemLayout.setCardBackgroundColor(color);
                    // versionViewHolder.rlMain.setAlpha(0.6f);
                 }
@@ -409,23 +441,11 @@ public class ActNotification extends Activity {
 
                 if (notificationListModel.getImage_URL() != null && notificationListModel.getImage_URL().length() > 1) {
                     App.showLog("===111===="+notificationListModel.getImage_URL() );
-                   /* Glide.with(getApplicationContext())
-                            .load(notificationListModel.getImage_URL())
-                            .placeholder(R.color.colorPrimaryDark)
-                            .into(versionViewHolder.ivUserPhoto);*/
 
                     versionViewHolder.progressBar.setVisibility(View.VISIBLE);
-                    //Glide.with(getApplicationContext()).load("http://"+notificationListModel.getImage_URL()).asGif().listener(new RequestListener<String, GifDrawable>() {
 
                     if(notificationListModel.getImage_URL().contains(".gif")) {
                         Glide.with(getApplicationContext()).load( "http://"+notificationListModel.getImage_URL()).asGif().listener(new RequestListener<String, GifDrawable>() {
-                            //new function maybe
-                       /* @Override
-                        public boolean onDownload(Progress currentProgress) {
-                            return false;
-                        }*/
-
-
                             @Override
                             public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
                                 return false;
@@ -433,7 +453,6 @@ public class ActNotification extends Activity {
 
                             @Override
                             public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-
                                 versionViewHolder.progressBar.setVisibility(View.GONE);
                                 return false;
                             }
@@ -474,6 +493,93 @@ public class ActNotification extends Activity {
                         }
                     }
                 });
+
+                versionViewHolder.bmb2.setOnBoomListener(new OnBoomListener() {
+                    @Override
+                    public void onClicked(int iMenu, BoomButton boomButton) {
+
+                        App.showLog("Item Clicked=" + i+"=Menu Clicked=" + iMenu);
+                        String strImageUrl = "http://"+ mArrListDLocationModel.get(i).getImage_URL();
+
+                        if(iMenu==0)
+                        {
+                            Intent intDownloadSong = new Intent(ActNotification.this,DownloadImage.class);
+                            intDownloadSong.putExtra("url",strImageUrl);
+                            intDownloadSong.putExtra("img_id",strImageUrl);
+                            intDownloadSong.putExtra("setwallpaper","2");
+                            startActivityForResult(intDownloadSong, 101);
+                        }
+                        else if(iMenu==1)
+                        {
+                            Intent intDownloadSong = new Intent(ActNotification.this,DownloadImage.class);
+                            intDownloadSong.putExtra("url",strImageUrl);
+                            intDownloadSong.putExtra("img_id",strImageUrl);
+                            intDownloadSong.putExtra("setwallpaper","1");
+                            startActivityForResult(intDownloadSong, 101);
+                        }
+                        else
+                        {
+                            realm.beginTransaction();
+                            mArrListDLocationModel.get(i).isFavorite = "1";
+                            realm.commitTransaction();
+
+                            notificationAdapter.notifyDataSetChanged();
+
+
+                            App.showSnackBar(recyclerView, "Added to Favorite -->"+i);
+                            //updateNewCard(i);
+                        }
+
+
+                    }
+
+                    @Override
+                    public void onBackgroundClick() {
+
+                    }
+
+                    @Override
+                    public void onBoomWillHide() {
+
+                    }
+
+                    @Override
+                    public void onBoomDidHide() {
+
+                    }
+
+                    @Override
+                    public void onBoomWillShow() {
+
+                    }
+
+                    @Override
+                    public void onBoomDidShow() {
+
+                    }
+                });
+
+                versionViewHolder.ivFav.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        {
+                            realm.beginTransaction();
+                            if(mArrListDLocationModel.get(i).isFavorite.equalsIgnoreCase("1"))
+                            {
+                                mArrListDLocationModel.get(i).isFavorite = "0";
+                                App.showSnackBar(recyclerView, "Removed from Favorite");
+                            }
+                            else
+                            {
+                                mArrListDLocationModel.get(i).isFavorite = "1";
+                                App.showSnackBar(recyclerView, "Added to Favorite");
+                            }
+                            realm.commitTransaction();
+                            notificationAdapter.notifyDataSetChanged();
+                        }
+                    }
+                });
+
                 // Set the view to fade in
                // setFadeAnimation(versionViewHolder.itemView);
                 setAnimation(versionViewHolder.itemView,i);
@@ -511,6 +617,21 @@ public class ActNotification extends Activity {
         }
 
 
+        public void updateNewCard(final int position) {
+
+
+
+           // mArrListDLocationModel.get(position).isFavorite = "1";
+
+            DLocationModel toEdit = realm.where(DLocationModel.class)
+                    .equalTo("Image_URL",mArrListDLocationModel.get(position).getImage_URL()).findFirst();
+            realm.beginTransaction();
+            toEdit.setIsFavorite("1");
+            realm.commitTransaction();
+
+           // notificationAdapter.notifyDataSetChanged();
+        }
+
         public void removeItem(final int position) {
 
 
@@ -535,6 +656,12 @@ public class ActNotification extends Activity {
             RelativeLayout rlMain;
             ProgressBar progressBar;
 
+            //BoomMenuButton bmb1;
+            BoomMenuButton bmb2;
+            //BoomMenuButton bmb3;
+
+            ImageView ivFav;
+
 
             public VersionViewHolder(View itemView) {
                 super(itemView);
@@ -544,12 +671,99 @@ public class ActNotification extends Activity {
                 tvName = (TextView) itemView.findViewById(R.id.tvName);
                 tvData = (TextView) itemView.findViewById(R.id.tvData);
                 ivUserPhoto = (ImageView) itemView.findViewById(R.id.ivUserPhoto);
+                ivFav = (ImageView) itemView.findViewById(R.id.ivFav);
                 progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
+
+                //bmb1 = (BoomMenuButton) itemView.findViewById(R.id.bmb1);
+                bmb2 = (BoomMenuButton) itemView.findViewById(R.id.bmb2);
+                //bmb3 = (BoomMenuButton) itemView.findViewById(R.id.bmb3);
+
+                tvName.setTypeface(App.getFont_Regular());
+                tvData.setTypeface(App.getFont_Bold());
 
             }
 
         }
     }
+
+    private static int[] imageResources = new int[]{
+            R.drawable.bat,
+            R.drawable.bear,
+            R.drawable.bee,
+            R.drawable.butterfly,
+            R.drawable.cat,
+            R.drawable.deer,
+            R.drawable.dolphin,
+            R.drawable.eagle,
+            R.drawable.horse,
+            R.drawable.elephant,
+            R.drawable.owl,
+            R.drawable.peacock,
+            R.drawable.pig,
+            R.drawable.rat,
+            R.drawable.snake,
+            R.drawable.squirrel
+    };
+
+    private static int imageResourceIndex = 0;
+
+    static int getImageResource() {
+        if (imageResourceIndex >= imageResources.length) imageResourceIndex = 0;
+        return imageResources[imageResourceIndex++];
+    }
+
+
+
+    private ArrayList getBuilderHamMenu()
+    {
+        ArrayList arrayList =  new ArrayList();
+
+        HamButton.Builder builder1 = new HamButton.Builder()
+                .normalImageRes(R.drawable.butterfly)
+                .normalTextRes(R.string.str_m1_t)
+                .subNormalTextRes(R.string.str_m1_d);
+               /* .listener(new OnBMClickListener() {
+                    @Override
+                    public void onBoomButtonClick(int index) {
+                        // When the boom-button corresponding this builder is clicked.
+                        App.showSnackBar(recyclerView, "Item Clicked=" + i+"=Menu Clicked=" + index);
+
+                    }
+                });*/
+
+        HamButton.Builder builder2 = new HamButton.Builder()
+                .normalImageRes(R.drawable.deer)
+                .normalTextRes(R.string.str_m2_t)
+                .subNormalTextRes(R.string.str_m2_d);
+                /*.listener(new OnBMClickListener() {
+                    @Override
+                    public void onBoomButtonClick(int index) {
+                        // When the boom-button corresponding this builder is clicked.
+                        App.showSnackBar(recyclerView, "Item Clicked=" + i+"=Menu Clicked=" + index);
+
+                    }
+                });
+*/
+        HamButton.Builder builder3 = new HamButton.Builder()
+                .normalImageRes(R.drawable.bat)
+                .normalTextRes(R.string.str_m3_t)
+                .subNormalTextRes(R.string.str_m3_d);
+                /*.listener(new OnBMClickListener() {
+                    @Override
+                    public void onBoomButtonClick(int index) {
+                        // When the boom-button corresponding this builder is clicked.
+                        App.showSnackBar(recyclerView, "Item Clicked=" + i+"=Menu Clicked=" + index);
+
+                    }
+                });*/
+
+        arrayList.add(builder1);
+        arrayList.add(builder2);
+        arrayList.add(builder3);
+
+        return arrayList;
+    }
+
 
 
     @Override

@@ -22,6 +22,9 @@ public class DLocationModel extends RealmObject {
     @SerializedName("Google_Maps_URL")
     public String Google_Maps_URL;
 
+    @SerializedName("isFavorite")
+    public String isFavorite="0";
+
     @SerializedName("ID")
     public int ID;
 
@@ -35,6 +38,10 @@ public class DLocationModel extends RealmObject {
 
     public void setID(int ID) {
         this.ID = ID;
+    }
+
+    public void setIsFavorite(String isFavorite) {
+        this.isFavorite = isFavorite;
     }
 
     public void setImage_URL(String image_URL) {
@@ -66,4 +73,7 @@ public class DLocationModel extends RealmObject {
         return Region;
     }
 
+    public String getIsFavorite() {
+        return isFavorite;
+    }
 }

@@ -74,4 +74,7 @@ dependencies {
 
     //for the multi screen dimension
     compile 'com.intuit.sdp:sdp-android:1.0.4'
+
+    // for the menu
+    compile 'com.nightonke:boommenu:2.1.0'
 }

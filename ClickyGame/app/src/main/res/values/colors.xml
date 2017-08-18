@@ -15,10 +15,16 @@
     <color name="clrListBgGray">#eee</color>
 
     <color name="clrTitle">#111</color>
-    <color name="clrDetail">#888</color>
+    <color name="clrDetail">#8111</color>
 
     <color name="clrCardbgUnRead">#cccccc</color>
     <color name="clrCardbgRead">#ffffff</color>
+
+
+    <color name="bgTrWhite">#50ffffff</color>
+    <color name="clrPeach">#FF4081</color>
+
+
 
 
 

@@ -51,6 +51,11 @@
 
         <activity android:name=".ActNotification"
             android:label="@string/app_name"/>
+        <activity
+            android:name=".DownloadImage"
+            android:theme="@style/Theme_Transperent"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
 
         <activity android:name=".demo.GridViewExampleActivity"
             android:label="@string/app_name"/>

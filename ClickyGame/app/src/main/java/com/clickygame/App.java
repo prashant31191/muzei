@@ -362,13 +362,14 @@ public class App extends Application {
     }
 
     public static Typeface getFont_Regular() {
-        tf_Regular = Typeface.createFromAsset(mContext.getAssets(), "font/regular_font.ttf");
+        tf_Regular = Typeface.createFromAsset(mContext.getAssets(), "font/roboto_light.ttf");
         return tf_Regular;
     }
 
 
     public static Typeface getFont_Bold() {
-        tf_Bold = Typeface.createFromAsset(mContext.getAssets(), "font/pacifico.ttf");
+        //tf_Bold = Typeface.createFromAsset(mContext.getAssets(), "font/pacifico.ttf");
+        tf_Bold = Typeface.createFromAsset(mContext.getAssets(), "font/roboto_regular.ttf");
         return tf_Bold;
     }
 
@@ -389,6 +390,12 @@ public class App extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    public static String getAppFolderName()
+    {
+        return Environment.getExternalStorageDirectory().toString() +  "/" + App.APP_FOLDERNAME ;
     }
 
 
