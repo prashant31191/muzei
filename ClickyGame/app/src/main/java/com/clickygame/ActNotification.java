@@ -10,9 +10,11 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -23,6 +25,7 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -45,6 +48,7 @@ import com.cjj.MaterialRefreshLayout;
 import com.cjj.MaterialRefreshListener;
 import com.clickygame.db.DLocationModel;
 import com.clickygame.utils.BuilderManager;
+import com.clickygame.utils.GridSpacingItemDecoration;
 import com.nightonke.boommenu.BoomButtons.BoomButton;
 import com.nightonke.boommenu.BoomButtons.HamButton;
 import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
@@ -59,13 +63,18 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
+import io.realm.Sort;
 
 
 public class ActNotification extends Activity {
 
     String TAG = "=ActNotification=";
 
+    ImageView ivListGrid;
+    LinearLayout llDashboard;
     RecyclerView recyclerView;
+    int intScreenHeight = 500;
+
     MaterialRefreshLayout materialRefreshLayout;
     NotificationAdapter notificationAdapter;
     TextView tvNodataTag;
@@ -117,6 +126,10 @@ public class ActNotification extends Activity {
         try{
 
             RealmResults<DLocationModel> arrDLocationModel = realm.where(DLocationModel.class).findAll();
+
+            // and if you want to sort in descending order
+            //arrDLocationModel = arrDLocationModel.sort("Country", Sort.DESCENDING);
+            arrDLocationModel = arrDLocationModel.sort("Country", Sort.ASCENDING);
 
             App.sLog("===arrDLocationModel=="+arrDLocationModel);
 
@@ -201,6 +214,8 @@ public class ActNotification extends Activity {
     private void initialization() {
         try {
             etSearch = (EditText) findViewById(R.id.etSearch);
+            ivListGrid = (ImageView) findViewById(R.id.ivListGrid);
+            llDashboard = (LinearLayout) findViewById(R.id.llDashboard);
             recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
             tvNodataTag = (TextView) findViewById(R.id.tvNodataTag);
             llNodataTag = (LinearLayout) findViewById(R.id.llNodataTag);
@@ -221,6 +236,35 @@ public class ActNotification extends Activity {
             recyclerView.setLayoutManager(linearLayoutManager);
             recyclerView.setHasFixedSize(true);
 
+            llDashboard.post(new Runnable() {
+                @Override
+                public void run() {
+                    //maybe also works height = ll.getLayoutParams().height;
+
+                    intScreenHeight  = llDashboard.getHeight();
+                    App.showLog("===intScreenHeight="+intScreenHeight);
+                    intScreenHeight = (int) intScreenHeight/3;
+                    App.showLog("===intScreenHeight="+intScreenHeight);
+                    //intScreenHeight = intScreenHeight - ( (int) App.convertDpToPixel(7,ActDashboard.this)); // 50px;
+                    intScreenHeight = intScreenHeight -10; // 50px;
+                }
+            });
+
+            ivListGrid.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(ivListGrid.isSelected() == true)
+                    {
+                        ivListGrid.setSelected(false);
+                    }
+                    else
+                    {
+                        ivListGrid.setSelected(true);
+                    }
+
+                    setListGridview(ivListGrid.isSelected());
+                }
+            });
 
             initSwipe();
 
@@ -684,6 +728,206 @@ public class ActNotification extends Activity {
             }
 
         }
+    }
+
+
+    RecyclerViewGridAdapter recyclerViewGridAdapter;
+    private void setListGridview(boolean isGridview)
+    {
+        try{
+
+            if(isGridview == true)
+            {
+              /*  LinearLayoutManager lLayout;
+                lLayout = new LinearLayoutManager(ActNotification.this);
+                recyclerView.setHasFixedSize(true);
+                recyclerView.setLayoutManager(lLayout);*/
+
+                recyclerView.setLayoutManager(new GridLayoutManager(this, 1));
+                int spacingInPixels = getResources().getDimensionPixelSize(R.dimen._1sdp);
+                recyclerView.addItemDecoration(new GridSpacingItemDecoration(1, spacingInPixels, true, 0));
+                notificationAdapter = new NotificationAdapter(ActNotification.this, arrayListAllDLocationModel);
+                recyclerView.setAdapter(notificationAdapter);
+                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                recyclerView.setVisibility(View.VISIBLE);
+                llNodataTag.setVisibility(View.GONE);
+            }
+            else
+            {
+                recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+                int spacingInPixels = getResources().getDimensionPixelSize(R.dimen._5sdp);
+                recyclerView.addItemDecoration(new GridSpacingItemDecoration(3, spacingInPixels, true, 0));
+                notificationAdapter = new NotificationAdapter(ActNotification.this, arrayListAllDLocationModel);
+                recyclerView.setAdapter(notificationAdapter);
+                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                recyclerView.setVisibility(View.VISIBLE);
+                llNodataTag.setVisibility(View.GONE);
+            }
+
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public class RecyclerViewGridAdapter extends RecyclerView.Adapter<RecyclerViewHolders> {
+
+        private ArrayList<DLocationModel> itemList;
+        private Context mContext;
+
+        public RecyclerViewGridAdapter(Context context, ArrayList<DLocationModel> itemList) {
+            this.itemList = itemList;
+            this.mContext = context;
+        }
+
+        @Override
+        public RecyclerViewHolders onCreateViewHolder(ViewGroup parent, int viewType) {
+
+            View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_notification_grid, null);
+            // or try
+            // View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_dashboard, parent, false);
+          /*int height = parent.getMeasuredHeight() / 4;
+            layoutView.setMinimumHeight(height);
+          */
+            RecyclerViewHolders rcv = new RecyclerViewHolders(layoutView);
+            return rcv;
+        }
+
+        @Override
+        public void onBindViewHolder(final RecyclerViewHolders holder, final int position) {
+            holder.tvTitleName.setText(itemList.get(position).getCountry()+ "#"+itemList.get(position).getRegion());
+            if (itemList.get(position).getImage_URL() != null && itemList.get(position).getImage_URL().length() > 1) {
+                App.showLog("===111===="+itemList.get(position).getImage_URL() );
+
+                holder.progressBar.setVisibility(View.VISIBLE);
+
+                if(itemList.get(position).getImage_URL().contains(".gif")) {
+                    Glide.with(getApplicationContext()).load( "http://"+itemList.get(position).getImage_URL()).asGif().listener(new RequestListener<String, GifDrawable>() {
+                        @Override
+                        public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                            holder.progressBar.setVisibility(View.GONE);
+                            return false;
+                        }
+                    }).into(holder.ivUserPhoto);
+                }
+                else {
+
+                    Glide.with(mContext)
+                            .load( "http://"+itemList.get(position).getImage_URL())
+                            .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                            .placeholder(R.color.colorPrimaryDark)
+                            .dontAnimate()
+                            .into(new GlideDrawableImageViewTarget(holder.ivUserPhoto) {
+                                @Override
+                                public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> animation) {
+                                    holder.progressBar.setVisibility(View.GONE);
+                                    super.onResourceReady(resource, animation);
+                                    //never called
+                                }
+
+                                @Override
+                                public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                                    super.onLoadFailed(e, errorDrawable);
+                                    //never called
+                                }
+                            });
+                }
+            }
+
+            holder.cardlist_item.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    App.showLog("=====click grid===");
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return this.itemList.size();
+        }
+    }
+    class RecyclerViewHolders extends RecyclerView.ViewHolder {
+
+        public TextView tvTitleName;
+        public ImageView ivUserPhoto,ivFav;
+        public LinearLayout llRawItem,llRawMain;
+        CardView cardlist_item;
+        ProgressBar progressBar;
+        //int width = 100;
+
+        public RecyclerViewHolders(View itemView) {
+            super(itemView);
+            try {
+                //   itemView.setOnClickListener(this);
+                cardlist_item = (CardView) itemView.findViewById(R.id.cardlist_item);
+                tvTitleName = (TextView) itemView.findViewById(R.id.tvTitleName);
+                llRawItem = (LinearLayout) itemView.findViewById(R.id.llRawItem);
+                ivUserPhoto = (ImageView) itemView.findViewById(R.id.ivUserPhoto);
+                ivFav = (ImageView) itemView.findViewById(R.id.ivFav);
+                progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
+
+
+                //llRawMain = (LinearLayout) itemView.findViewById(R.id.llRawMain);
+/*
+                ViewTreeObserver vto = llRawItem.getViewTreeObserver();
+                vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                            llRawItem.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                        } else {
+                            llRawItem.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        }
+                        //width  = llRawItem.getMeasuredWidth();
+                        //App.showLog("==111=width==="+width);
+                        // int height = llRawItem.getMeasuredHeight();
+                        //App.showLog("==111=height==="+height);
+                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) llRawItem.getLayoutParams();
+                        //App.showLog("==222=width==="+width);
+                        params.height = intScreenHeight; //llRawItem.getMeasuredWidth();
+                        // App.showLog("==222=height==="+params.height);
+                        llRawItem.setLayoutParams(params);
+                    }
+                });
+
+                if(intScreenHeight > 50)
+                {
+
+                    LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) llRawItem.getLayoutParams();
+                    //App.showLog("==222=width==="+width);
+                    params.height = intScreenHeight; //llRawItem.getMeasuredWidth();
+                    // App.showLog("==222=height==="+params.height);
+                    llRawItem.setLayoutParams(params);
+                }
+                else
+                {
+                    intScreenHeight = 100;
+
+                    LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) llRawItem.getLayoutParams();
+                    //App.showLog("==222=width==="+width);
+                    params.height = intScreenHeight; //llRawItem.getMeasuredWidth();
+                    // App.showLog("==222=height==="+params.height);
+                    llRawItem.setLayoutParams(params);
+                }*/
+
+
+
+                tvTitleName.setTypeface(App.getFont_Regular());
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+
     }
 
     private static int[] imageResources = new int[]{
