@@ -10,7 +10,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -21,11 +20,9 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -47,11 +44,10 @@ import com.bumptech.glide.request.target.Target;
 import com.cjj.MaterialRefreshLayout;
 import com.cjj.MaterialRefreshListener;
 import com.clickygame.db.DLocationModel;
-import com.clickygame.utils.BuilderManager;
 import com.clickygame.utils.GridSpacingItemDecoration;
+import com.clickygame.utils.RealmBackupRestore;
 import com.nightonke.boommenu.BoomButtons.BoomButton;
 import com.nightonke.boommenu.BoomButtons.HamButton;
-import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
 import com.nightonke.boommenu.BoomMenuButton;
 import com.nightonke.boommenu.OnBoomListener;
 
@@ -61,7 +57,6 @@ import java.util.List;
 import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
-import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -70,7 +65,7 @@ public class ActNotification extends Activity {
 
     String TAG = "=ActNotification=";
 
-    ImageView ivListGrid;
+    ImageView ivListGrid, ivBackup, ivRestore, ivDelete;
     LinearLayout llDashboard;
     RecyclerView recyclerView;
     int intScreenHeight = 500;
@@ -107,7 +102,7 @@ public class ActNotification extends Activity {
             RealmConfiguration realmConfiguration = new RealmConfiguration.Builder().build();
             realm = Realm.getInstance(realmConfiguration);
 
-             page = 0;
+            page = 0;
             arrayListAllDLocationModel = new ArrayList<>();
             getAllRecords();
 
@@ -116,14 +111,15 @@ public class ActNotification extends Activity {
             e.printStackTrace();
         }
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         realm.close(); // Remember to close Realm when done.
     }
 
-    private void getAllRecords(){
-        try{
+    private void getAllRecords() {
+        try {
 
             RealmResults<DLocationModel> arrDLocationModel = realm.where(DLocationModel.class).findAll();
 
@@ -131,64 +127,15 @@ public class ActNotification extends Activity {
             //arrDLocationModel = arrDLocationModel.sort("Country", Sort.DESCENDING);
             arrDLocationModel = arrDLocationModel.sort("Country", Sort.ASCENDING);
 
-            App.sLog("===arrDLocationModel=="+arrDLocationModel);
+            App.sLog("===arrDLocationModel==" + arrDLocationModel);
 
             List<DLocationModel> arraDLocationModel = arrDLocationModel;
 
-            for(int k=0;k<arraDLocationModel.size();k++)
-            {
-                App.sLog(k+"===arraDLocationModel=="+arraDLocationModel.get(k).getImage_URL());
+            for (int k = 0; k < arraDLocationModel.size(); k++) {
+                App.sLog(k + "===arraDLocationModel==" + arraDLocationModel.get(k).getImage_URL());
             }
 
             arrayListAllDLocationModel = new ArrayList<DLocationModel>(arraDLocationModel);
-
-
-
-           // RealmQuery<DLocationModel> query = realm.where(DLocationModel.class);
-            /*
-            for (String id : ids) {
-                query.or().equalTo("myField", id);
-            }*/
-
-/*
-            RealmResults<DLocationModel> results = query.findAll();
-            App.sLog("===results=="+results);
-            */
-
-
-            setViewData();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    private void getAllSearchRecords(String strTextCountry){
-        try{
-
-            //RealmResults<DLocationModel> arrDLocationModel = realm.where(DLocationModel.class).findAll();
-            //RealmResults<DLocationModel> result = realm.where(DLocationModel.class).equalTo("Image_URL",mArrListDLocationModel.get(position).getImage_URL()).findAll();
-
-
-
-            RealmResults<DLocationModel> arrDLocationModel = realm.where(DLocationModel.class)
-                    .contains("Country", strTextCountry, Case.INSENSITIVE)
-                    //.contains("Country", strTextCountry,false)
-                    //.containsIgnoreCase("Country", strTextCountry)
-                    .findAll();
-
-            App.sLog("===arrDLocationModel=="+arrDLocationModel);
-
-            List<DLocationModel> arraDLocationModel = arrDLocationModel;
-
-            for(int k=0;k<arraDLocationModel.size();k++)
-            {
-                App.sLog(k+"===arraDLocationModel=="+arraDLocationModel.get(k).getImage_URL());
-            }
-
-            arrayListAllDLocationModel = new ArrayList<DLocationModel>(arraDLocationModel);
-
 
 
             // RealmQuery<DLocationModel> query = realm.where(DLocationModel.class);
@@ -204,9 +151,49 @@ public class ActNotification extends Activity {
 
 
             setViewData();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        catch (Exception e)
-        {
+    }
+
+    private void getAllSearchRecords(String strTextCountry) {
+        try {
+
+            //RealmResults<DLocationModel> arrDLocationModel = realm.where(DLocationModel.class).findAll();
+            //RealmResults<DLocationModel> result = realm.where(DLocationModel.class).equalTo("Image_URL",mArrListDLocationModel.get(position).getImage_URL()).findAll();
+
+
+            RealmResults<DLocationModel> arrDLocationModel = realm.where(DLocationModel.class)
+                    .contains("Country", strTextCountry, Case.INSENSITIVE)
+                    //.contains("Country", strTextCountry,false)
+                    //.containsIgnoreCase("Country", strTextCountry)
+                    .findAll();
+
+            App.sLog("===arrDLocationModel==" + arrDLocationModel);
+
+            List<DLocationModel> arraDLocationModel = arrDLocationModel;
+
+            for (int k = 0; k < arraDLocationModel.size(); k++) {
+                App.sLog(k + "===arraDLocationModel==" + arraDLocationModel.get(k).getImage_URL());
+            }
+
+            arrayListAllDLocationModel = new ArrayList<DLocationModel>(arraDLocationModel);
+
+
+            // RealmQuery<DLocationModel> query = realm.where(DLocationModel.class);
+            /*
+            for (String id : ids) {
+                query.or().equalTo("myField", id);
+            }*/
+
+/*
+            RealmResults<DLocationModel> results = query.findAll();
+            App.sLog("===results=="+results);
+            */
+
+
+            setViewData();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -215,6 +202,11 @@ public class ActNotification extends Activity {
         try {
             etSearch = (EditText) findViewById(R.id.etSearch);
             ivListGrid = (ImageView) findViewById(R.id.ivListGrid);
+
+            ivBackup = (ImageView) findViewById(R.id.ivBackup);
+            ivRestore = (ImageView) findViewById(R.id.ivRestore);
+            ivDelete = (ImageView) findViewById(R.id.ivDelete);
+
             llDashboard = (LinearLayout) findViewById(R.id.llDashboard);
             recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
             tvNodataTag = (TextView) findViewById(R.id.tvNodataTag);
@@ -241,28 +233,51 @@ public class ActNotification extends Activity {
                 public void run() {
                     //maybe also works height = ll.getLayoutParams().height;
 
-                    intScreenHeight  = llDashboard.getHeight();
-                    App.showLog("===intScreenHeight="+intScreenHeight);
-                    intScreenHeight = (int) intScreenHeight/3;
-                    App.showLog("===intScreenHeight="+intScreenHeight);
+                    intScreenHeight = llDashboard.getHeight();
+                    App.showLog("===intScreenHeight=" + intScreenHeight);
+                    intScreenHeight = (int) intScreenHeight / 3;
+                    App.showLog("===intScreenHeight=" + intScreenHeight);
                     //intScreenHeight = intScreenHeight - ( (int) App.convertDpToPixel(7,ActDashboard.this)); // 50px;
-                    intScreenHeight = intScreenHeight -10; // 50px;
+                    intScreenHeight = intScreenHeight - 10; // 50px;
                 }
             });
 
             ivListGrid.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(ivListGrid.isSelected() == true)
-                    {
+                    if (ivListGrid.isSelected() == true) {
                         ivListGrid.setSelected(false);
-                    }
-                    else
-                    {
+                    } else {
                         ivListGrid.setSelected(true);
                     }
 
                     setListGridview(ivListGrid.isSelected());
+                }
+            });
+
+            ivBackup.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    App.showLog("=======backup======");
+                    RealmBackupRestore realmBackupRestore = new RealmBackupRestore(ActNotification.this);
+                    realmBackupRestore.backup();
+                }
+            });
+            ivRestore.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    App.showLog("=======restore======");
+                    RealmBackupRestore realmBackupRestore = new RealmBackupRestore(ActNotification.this);
+                    realmBackupRestore.restore();
+                }
+            });
+
+            ivDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    App.showLog("=======delete======");
+                    RealmBackupRestore realmBackupRestore = new RealmBackupRestore(ActNotification.this);
+                    realmBackupRestore.delete();
                 }
             });
 
@@ -442,22 +457,16 @@ public class ActNotification extends Activity {
 */
                 versionViewHolder.bmb2.clearBuilders();
 
-                for (int j = 0; j < versionViewHolder.bmb2.getPiecePlaceEnum().pieceNumber(); j++)
-                {
+                for (int j = 0; j < versionViewHolder.bmb2.getPiecePlaceEnum().pieceNumber(); j++) {
                     versionViewHolder.bmb2.addBuilder((HamButton.Builder) getBuilderHamMenu().get(j));
                 }
 
 
-
-
-                if (notificationListModel.getIsFavorite() != null && notificationListModel.getIsFavorite().equalsIgnoreCase("1"))
-                {
+                if (notificationListModel.getIsFavorite() != null && notificationListModel.getIsFavorite().equalsIgnoreCase("1")) {
                     versionViewHolder.ivFav.setVisibility(View.VISIBLE);
                     versionViewHolder.ivFav.setSelected(true);
                     versionViewHolder.ivFav.setAlpha(1f);
-                }
-                else
-                {
+                } else {
                     versionViewHolder.ivFav.setVisibility(View.VISIBLE);
                     versionViewHolder.ivFav.setSelected(false);
                     versionViewHolder.ivFav.setAlpha(0.5f);
@@ -466,7 +475,7 @@ public class ActNotification extends Activity {
                 versionViewHolder.cardItemLayout.setCardBackgroundColor(App.getMatColor("A100"));
 
                 if (notificationListModel.getCountry() != null && notificationListModel.getRegion() != null && notificationListModel.getRegion().length() > 0) {
-                    versionViewHolder.tvName.setText(Html.fromHtml("<b>" + notificationListModel.getCountry() + " # </b>" + notificationListModel.getRegion() ));
+                    versionViewHolder.tvName.setText(Html.fromHtml("<b>" + notificationListModel.getCountry() + " # </b>" + notificationListModel.getRegion()));
                     versionViewHolder.tvName.setTextColor(Color.parseColor("#000000"));
                     //int color = versionViewHolder.cardItemLayout.getContext().getResources().getColor(R.color.clrCardbgUnRead);
                     //versionViewHolder.cardItemLayout.setCardBackgroundColor(color);
@@ -474,9 +483,9 @@ public class ActNotification extends Activity {
                     versionViewHolder.tvName.setText(Html.fromHtml("<b>" + notificationListModel.getCountry() + "</b>"));
                     versionViewHolder.tvName.setTextColor(Color.parseColor("#111111"));
 
-                   // int color = versionViewHolder.cardItemLayout.getContext().getResources().getColor(R.color.clrCardbgRead);
+                    // int color = versionViewHolder.cardItemLayout.getContext().getResources().getColor(R.color.clrCardbgRead);
                     //versionViewHolder.cardItemLayout.setCardBackgroundColor(color);
-                   // versionViewHolder.rlMain.setAlpha(0.6f);
+                    // versionViewHolder.rlMain.setAlpha(0.6f);
                 }
 
                 if (notificationListModel.getGoogle_Maps_URL() != null && notificationListModel.getGoogle_Maps_URL().length() > 1) {
@@ -484,12 +493,12 @@ public class ActNotification extends Activity {
                 }
 
                 if (notificationListModel.getImage_URL() != null && notificationListModel.getImage_URL().length() > 1) {
-                    App.showLog("===111===="+notificationListModel.getImage_URL() );
+                    App.showLog("===111====" + notificationListModel.getImage_URL());
 
                     versionViewHolder.progressBar.setVisibility(View.VISIBLE);
 
-                    if(notificationListModel.getImage_URL().contains(".gif")) {
-                        Glide.with(getApplicationContext()).load( "http://"+notificationListModel.getImage_URL()).asGif().listener(new RequestListener<String, GifDrawable>() {
+                    if (notificationListModel.getImage_URL().contains(".gif")) {
+                        Glide.with(getApplicationContext()).load("http://" + notificationListModel.getImage_URL()).asGif().listener(new RequestListener<String, GifDrawable>() {
                             @Override
                             public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
                                 return false;
@@ -501,11 +510,10 @@ public class ActNotification extends Activity {
                                 return false;
                             }
                         }).into(versionViewHolder.ivUserPhoto);
-                    }
-                    else {
+                    } else {
 
                         Glide.with(mContext)
-                                .load( "http://"+notificationListModel.getImage_URL())
+                                .load("http://" + notificationListModel.getImage_URL())
                                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                                 .placeholder(R.color.colorPrimaryDark)
                                 .dontAnimate()
@@ -531,7 +539,7 @@ public class ActNotification extends Activity {
                     @Override
                     public void onClick(View view) {
                         try {
-                            App.showLog("===111=click==="+ mArrListDLocationModel.get(i).getImage_URL() );
+                            App.showLog("===111=click===" + mArrListDLocationModel.get(i).getImage_URL());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -542,27 +550,22 @@ public class ActNotification extends Activity {
                     @Override
                     public void onClicked(int iMenu, BoomButton boomButton) {
 
-                        App.showLog("Item Clicked=" + i+"=Menu Clicked=" + iMenu);
-                        String strImageUrl = "http://"+ mArrListDLocationModel.get(i).getImage_URL();
+                        App.showLog("Item Clicked=" + i + "=Menu Clicked=" + iMenu);
+                        String strImageUrl = "http://" + mArrListDLocationModel.get(i).getImage_URL();
 
-                        if(iMenu==0)
-                        {
-                            Intent intDownloadSong = new Intent(ActNotification.this,DownloadImage.class);
-                            intDownloadSong.putExtra("url",strImageUrl);
-                            intDownloadSong.putExtra("img_id",strImageUrl);
-                            intDownloadSong.putExtra("setwallpaper","2");
+                        if (iMenu == 0) {
+                            Intent intDownloadSong = new Intent(ActNotification.this, DownloadImage.class);
+                            intDownloadSong.putExtra("url", strImageUrl);
+                            intDownloadSong.putExtra("img_id", strImageUrl);
+                            intDownloadSong.putExtra("setwallpaper", "2");
                             startActivityForResult(intDownloadSong, 101);
-                        }
-                        else if(iMenu==1)
-                        {
-                            Intent intDownloadSong = new Intent(ActNotification.this,DownloadImage.class);
-                            intDownloadSong.putExtra("url",strImageUrl);
-                            intDownloadSong.putExtra("img_id",strImageUrl);
-                            intDownloadSong.putExtra("setwallpaper","1");
+                        } else if (iMenu == 1) {
+                            Intent intDownloadSong = new Intent(ActNotification.this, DownloadImage.class);
+                            intDownloadSong.putExtra("url", strImageUrl);
+                            intDownloadSong.putExtra("img_id", strImageUrl);
+                            intDownloadSong.putExtra("setwallpaper", "1");
                             startActivityForResult(intDownloadSong, 101);
-                        }
-                        else
-                        {
+                        } else {
                             realm.beginTransaction();
                             mArrListDLocationModel.get(i).isFavorite = "1";
                             realm.commitTransaction();
@@ -570,7 +573,7 @@ public class ActNotification extends Activity {
                             notificationAdapter.notifyDataSetChanged();
 
 
-                            App.showSnackBar(recyclerView, "Added to Favorite -->"+i);
+                            App.showSnackBar(recyclerView, "Added to Favorite -->" + i);
                             //updateNewCard(i);
                         }
 
@@ -608,13 +611,10 @@ public class ActNotification extends Activity {
                     public void onClick(View v) {
                         {
                             realm.beginTransaction();
-                            if(mArrListDLocationModel.get(i).isFavorite.equalsIgnoreCase("1"))
-                            {
+                            if (mArrListDLocationModel.get(i).isFavorite.equalsIgnoreCase("1")) {
                                 mArrListDLocationModel.get(i).isFavorite = "0";
                                 App.showSnackBar(recyclerView, "Removed from Favorite");
-                            }
-                            else
-                            {
+                            } else {
                                 mArrListDLocationModel.get(i).isFavorite = "1";
                                 App.showSnackBar(recyclerView, "Added to Favorite");
                             }
@@ -625,8 +625,8 @@ public class ActNotification extends Activity {
                 });
 
                 // Set the view to fade in
-               // setFadeAnimation(versionViewHolder.itemView);
-                setAnimation(versionViewHolder.itemView,i);
+                // setFadeAnimation(versionViewHolder.itemView);
+                setAnimation(versionViewHolder.itemView, i);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -638,17 +638,17 @@ public class ActNotification extends Activity {
         // Allows to remember the last item shown on screen
         private int lastPosition = -1;
 
-        private void setAnimation(View viewToAnimate, int position)
-        {
+        private void setAnimation(View viewToAnimate, int position) {
             // If the bound view wasn't previously displayed on screen, it's animated
-            if (position > lastPosition)
-            {
+            if (position > lastPosition) {
                 Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.slide_in_up);
                 viewToAnimate.startAnimation(animation);
                 lastPosition = position;
             }
         }
+
         int FADE_DURATION = 300;
+
         private void setFadeAnimation(View view) {
             AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
             anim.setDuration(FADE_DURATION);
@@ -664,16 +664,15 @@ public class ActNotification extends Activity {
         public void updateNewCard(final int position) {
 
 
-
-           // mArrListDLocationModel.get(position).isFavorite = "1";
+            // mArrListDLocationModel.get(position).isFavorite = "1";
 
             DLocationModel toEdit = realm.where(DLocationModel.class)
-                    .equalTo("Image_URL",mArrListDLocationModel.get(position).getImage_URL()).findFirst();
+                    .equalTo("Image_URL", mArrListDLocationModel.get(position).getImage_URL()).findFirst();
             realm.beginTransaction();
             toEdit.setIsFavorite("1");
             realm.commitTransaction();
 
-           // notificationAdapter.notifyDataSetChanged();
+            // notificationAdapter.notifyDataSetChanged();
         }
 
         public void removeItem(final int position) {
@@ -682,14 +681,14 @@ public class ActNotification extends Activity {
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
-                    RealmResults<DLocationModel> result = realm.where(DLocationModel.class).equalTo("Image_URL",mArrListDLocationModel.get(position).getImage_URL()).findAll();
+                    RealmResults<DLocationModel> result = realm.where(DLocationModel.class).equalTo("Image_URL", mArrListDLocationModel.get(position).getImage_URL()).findAll();
                     result.deleteAllFromRealm();
                 }
             });
 
-                mArrListDLocationModel.remove(position);
-                notifyItemRemoved(position);
-                notifyItemRangeChanged(position, mArrListDLocationModel.size());
+            mArrListDLocationModel.remove(position);
+            notifyItemRemoved(position);
+            notifyItemRangeChanged(position, mArrListDLocationModel.size());
         }
 
 
@@ -732,12 +731,11 @@ public class ActNotification extends Activity {
 
 
     RecyclerViewGridAdapter recyclerViewGridAdapter;
-    private void setListGridview(boolean isGridview)
-    {
-        try{
 
-            if(isGridview == true)
-            {
+    private void setListGridview(boolean isGridview) {
+        try {
+
+            if (isGridview == true) {
               /*  LinearLayoutManager lLayout;
                 lLayout = new LinearLayoutManager(ActNotification.this);
                 recyclerView.setHasFixedSize(true);
@@ -751,9 +749,7 @@ public class ActNotification extends Activity {
                 recyclerView.setItemAnimator(new DefaultItemAnimator());
                 recyclerView.setVisibility(View.VISIBLE);
                 llNodataTag.setVisibility(View.GONE);
-            }
-            else
-            {
+            } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
                 int spacingInPixels = getResources().getDimensionPixelSize(R.dimen._5sdp);
                 recyclerView.addItemDecoration(new GridSpacingItemDecoration(3, spacingInPixels, true, 0));
@@ -764,9 +760,7 @@ public class ActNotification extends Activity {
                 llNodataTag.setVisibility(View.GONE);
             }
 
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -796,14 +790,14 @@ public class ActNotification extends Activity {
 
         @Override
         public void onBindViewHolder(final RecyclerViewHolders holder, final int position) {
-            holder.tvTitleName.setText(itemList.get(position).getCountry()+ "#"+itemList.get(position).getRegion());
+            holder.tvTitleName.setText(itemList.get(position).getCountry() + "#" + itemList.get(position).getRegion());
             if (itemList.get(position).getImage_URL() != null && itemList.get(position).getImage_URL().length() > 1) {
-                App.showLog("===111===="+itemList.get(position).getImage_URL() );
+                App.showLog("===111====" + itemList.get(position).getImage_URL());
 
                 holder.progressBar.setVisibility(View.VISIBLE);
 
-                if(itemList.get(position).getImage_URL().contains(".gif")) {
-                    Glide.with(getApplicationContext()).load( "http://"+itemList.get(position).getImage_URL()).asGif().listener(new RequestListener<String, GifDrawable>() {
+                if (itemList.get(position).getImage_URL().contains(".gif")) {
+                    Glide.with(getApplicationContext()).load("http://" + itemList.get(position).getImage_URL()).asGif().listener(new RequestListener<String, GifDrawable>() {
                         @Override
                         public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
                             return false;
@@ -815,11 +809,10 @@ public class ActNotification extends Activity {
                             return false;
                         }
                     }).into(holder.ivUserPhoto);
-                }
-                else {
+                } else {
 
                     Glide.with(mContext)
-                            .load( "http://"+itemList.get(position).getImage_URL())
+                            .load("http://" + itemList.get(position).getImage_URL())
                             .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                             .placeholder(R.color.colorPrimaryDark)
                             .dontAnimate()
@@ -853,11 +846,12 @@ public class ActNotification extends Activity {
             return this.itemList.size();
         }
     }
+
     class RecyclerViewHolders extends RecyclerView.ViewHolder {
 
         public TextView tvTitleName;
-        public ImageView ivUserPhoto,ivFav;
-        public LinearLayout llRawItem,llRawMain;
+        public ImageView ivUserPhoto, ivFav;
+        public LinearLayout llRawItem, llRawMain;
         CardView cardlist_item;
         ProgressBar progressBar;
         //int width = 100;
@@ -918,11 +912,8 @@ public class ActNotification extends Activity {
                 }*/
 
 
-
                 tvTitleName.setTypeface(App.getFont_Regular());
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -957,10 +948,8 @@ public class ActNotification extends Activity {
     }
 
 
-
-    private ArrayList getBuilderHamMenu()
-    {
-        ArrayList arrayList =  new ArrayList();
+    private ArrayList getBuilderHamMenu() {
+        ArrayList arrayList = new ArrayList();
 
         HamButton.Builder builder1 = new HamButton.Builder()
                 .normalImageRes(R.drawable.butterfly)
@@ -1007,7 +996,6 @@ public class ActNotification extends Activity {
 
         return arrayList;
     }
-
 
 
     @Override
