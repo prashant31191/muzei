@@ -90,5 +90,7 @@ dependencies {
 
     // for the token and notification
     compile 'com.google.firebase:firebase-messaging:11.0.1'
+
+    compile project(path: ':googleadssdk')
 }
 apply plugin: 'com.google.gms.google-services'

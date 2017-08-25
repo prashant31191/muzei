@@ -54,6 +54,8 @@ import com.nightonke.boommenu.OnBoomListener;
 import java.util.ArrayList;
 import java.util.List;
 
+
+import google.ads.AdsDisplayUtil;
 import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -362,6 +364,9 @@ public class ActNotification extends Activity {
                 page = 0;
                 arrayListAllDLocationModel = new ArrayList<>();
                 getAllRecords();
+                AdsDisplayUtil.openBnrIntAdsScreen(getApplicationContext(),"","");
+
+
             }
 
             @Override
@@ -559,12 +564,18 @@ public class ActNotification extends Activity {
                             intDownloadSong.putExtra("img_id", strImageUrl);
                             intDownloadSong.putExtra("setwallpaper", "2");
                             startActivityForResult(intDownloadSong, 101);
+
+                            AdsDisplayUtil.openBnrIntAdsScreen(getApplicationContext(),"","");
+
                         } else if (iMenu == 1) {
                             Intent intDownloadSong = new Intent(ActNotification.this, DownloadImage.class);
                             intDownloadSong.putExtra("url", strImageUrl);
                             intDownloadSong.putExtra("img_id", strImageUrl);
                             intDownloadSong.putExtra("setwallpaper", "1");
                             startActivityForResult(intDownloadSong, 101);
+
+                            AdsDisplayUtil.openBnrIntAdsScreen(getApplicationContext(),"","");
+
                         } else {
                             realm.beginTransaction();
                             mArrListDLocationModel.get(i).isFavorite = "1";
